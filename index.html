@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Viewability.js News Paper</title>
-    <link href="./index.css" type="text/css" rel="stylesheet" />
-    <script type="module" src="/dist/index.esm.js"></script>
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link href="/src/style.css" rel="stylesheet" />
   </head>
   <body class="bg-gray-100 text-gray-900">
     <div class="max-w-6xl mx-auto p-6 bg-white shadow-lg">
@@ -162,17 +162,11 @@
         </div>
       </div>
     </div>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        if (typeof Viewability !== "undefined") {
-          var tracker = new Viewability("target");
-          tracker.onComplete = function () {
-            console.log("Element '#target' fully viewed!");
-          }
-        } else {
-          console.error("Viewability is not defined");
-        }
-      });
+    <script type="module">
+      import Viewability from "./src/viewability";
+      const tracker = new Viewability("target");
+      tracker.onComplete = () =>
+        console.log("🎯 Element '#target' fully viewed!");
     </script>
   </body>
 </html>

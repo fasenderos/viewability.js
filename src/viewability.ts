@@ -1,4 +1,4 @@
-type ViewabilityOptions = {
+export type ViewabilityOptions = {
   /**
    * Automatically starts tracking on instantiation
    * @default true
@@ -18,15 +18,16 @@ type ViewabilityOptions = {
   onComplete?: (() => void) | undefined;
 };
 
-class Viewability {
+export class Viewability {
+  // @ts-expect-error assigned in constructor
   element: HTMLElement;
   options: ViewabilityOptions;
-  observer: IntersectionObserver | null;
-  started: boolean;
-  percentViewable: number;
-  inView: boolean;
+  observer: IntersectionObserver | null = null;
+  started = false;
+  percentViewable = 0;
+  inView = false;
   timer: NodeJS.Timeout | undefined;
-  completed: boolean;
+  completed = false;
   onComplete: (() => void) | undefined;
 
   constructor(
@@ -52,11 +53,6 @@ class Viewability {
     }
 
     this.element = element;
-    this.started = false;
-    this.percentViewable = 0.0;
-    this.inView = false;
-    this.completed = false;
-    this.observer = null;
     if (this.options.autostart) this.start();
   }
 
@@ -162,6 +158,4 @@ class Viewability {
   }
 }
 
-// @ts-ignore
-window.Viewability = Viewability;
-export { Viewability, type ViewabilityOptions };
+export default Viewability;
