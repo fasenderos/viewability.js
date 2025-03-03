@@ -2,6 +2,7 @@
     <a href="https://www.npmjs.com/package/viewability.js" target="_blank"><img src="https://img.shields.io/npm/v/viewability.js?color=blue" alt="NPM Version"></a>
     <a href="https://github.com/fasenderos/viewability.js/blob/main/LICENSE" target="_blank"><img src="https://img.shields.io/npm/l/viewability.js" alt="Package License"></a>
     <a href="https://www.npmjs.com/package/viewability.js" target="_blank"><img src="https://img.shields.io/npm/dm/viewability.js" alt="NPM Downloads"></a>
+    <a href="https://codecov.io/github/fasenderos/viewability.js" target="_blank"><img src="https://img.shields.io/codecov/c/github/fasenderos/viewability.js" alt="Codecov"></a>
     <a href="https://github.com/fasenderos/viewability.js"><img src="https://badgen.net/badge/icon/typescript?icon=typescript&label" alt="Built with TypeScript"></a>
 </p>
 

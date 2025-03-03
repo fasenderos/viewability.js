@@ -2,10 +2,17 @@
   "name": "viewability.js",
   "version": "0.0.1",
   "description": "Viewability tracker used to measure whether a DOM elements is actually seen by users",
-  "source": "src/index.ts",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/viewability.js",
+      "require": "./dist/viewability.cjs"
+    }
+  },
+  "main": "./dist/viewability.cjs",
+  "module": "./dist/viewability.js",
+  "browser": "./dist/viewability.iife.js",
+  "types": "./dist/viewability.d.ts",
   "author": "Andrea Fassina <fasenderos@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/fasenderos/viewability.js",
@@ -17,21 +24,16 @@
     "url": "https://github.com/fasenderos/viewability.js/issues"
   },
   "scripts": {
-    "clean": "rm -rf .parcel-cache && rm -rf dist",
-    "lint": "biome check ./src",
-    "lint:fix": "biome check --write ./src",
-    "watch": "npm run clean && parcel watch",
-    "build": "npm run clean && parcel build",
-    "start": "npm run build && parcel src/index.html",
-    "release": "release-it"
-  },
-  "targets": {
-    "main": {
-      "optimize": true
-    },
-    "module": {
-      "optimize": true
-    }
+    "build": "npm run clean && tsc && vite build",
+    "clean": "rm -rf dist",
+    "dev": "vite --host",
+    "lint": "biome check ./src ./test",
+    "lint:fix": "biome check --write ./src ./test",
+    "preview": "vite preview",
+    "release": "release-it",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:dev": "vitest --coverage"
   },
   "keywords": [
     "viewability",
@@ -41,18 +43,22 @@
   ],
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@parcel/packager-ts": "2.13.3",
-    "@parcel/transformer-typescript-types": "2.13.3",
     "@release-it/conventional-changelog": "^10.0.0",
     "@tailwindcss/postcss": "^4.0.9",
-    "parcel": "^2.13.3",
-    "postcss": "^8.2.1",
+    "@types/node": "^22.13.9",
+    "@vitest/coverage-v8": "^3.0.7",
+    "jsdom": "^26.0.0",
+    "postcss": "^8.5.3",
     "release-it": "^18.1.2",
     "tailwindcss": "^4.0.9",
-    "typescript": ">=3.0.0"
+    "typescript": ">=3.0.0",
+    "vite": "^6.2.0",
+    "vite-plugin-dts": "^4.5.3",
+    "vitest": "^3.0.7"
   },
   "files": [
     "dist",
+    "!dist/*.css",
     "AUTHORS",
     "CHANGELOG.md",
     "LICENSE",
