@@ -22,6 +22,13 @@ export default defineConfig({
     coverage: {
       // https://vitest.dev/config/#coverage-exclude
       exclude: ["src/main.ts", ...coverageConfigDefaults.exclude],
+      reporter: ["text", "lcov"],
+      thresholds: {
+        statements: 100,
+        branches: 100,
+        functions: 100,
+        lines: 100,
+      },
     },
   },
 });
