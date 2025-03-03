@@ -31,7 +31,7 @@ class Viewability {
 
   constructor(
     elem: HTMLElement | string,
-    options: Partial<ViewabilityOptions> = {}
+    options: Partial<ViewabilityOptions> = {},
   ) {
     this.options = Object.assign(
       {
@@ -39,7 +39,7 @@ class Viewability {
         timeInView: 1000,
         autostart: true,
       },
-      options
+      options,
     );
     if (!this._validateOptions()) {
       return;
@@ -65,7 +65,7 @@ class Viewability {
     if (this.observer) return; // Avoid multiple observers
     this.observer = new window.IntersectionObserver(
       this._viewableChange.bind(this),
-      { threshold: this.options.inViewThreshold }
+      { threshold: this.options.inViewThreshold },
     );
     this.observer.observe(this.element);
   }
