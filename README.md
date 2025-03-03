@@ -9,6 +9,8 @@
 
 Viewability.js is a lightweight JavaScript library that tracks the visibility of a DOM element within the viewport using the IntersectionObserver API. It allows developers to measure how much of an element is visible and for how long, making it useful for ad tracking, analytics, and user engagement monitoring.
 
+By default, the library follows the **IAB Standard** for viewability measurement (50% visibility for at least 1 second), but these values can be fully customized to fit specific needs.
+
 <p align="center">
 :star: Star me on GitHub — it motivates me a lot!
 </p>
@@ -16,11 +18,12 @@ Viewability.js is a lightweight JavaScript library that tracks the visibility of
 ## Features
 
 - Uses **IntersectionObserver** for efficient viewability tracking
-- Supports **custom visibility thresholds** (e.g., 50% in view)
-- Measures **time in view** before marking an element as fully viewed
-- Supports **automatic tracking** on initialization
+- Uses **IAB Standard** defaults for viewability measurement
+- Supports **custom visibility thresholds** (default to 50%)
+- Measures **time in view** before marking an element as fully viewed (default to 1 second)
 - Exposes a **public API** for manual control
 - Provides an **onComplete callback** when the element meets the viewability criteria
+- Accepts an **element reference**, an **ID string**, or a **CSS selector** to specify the target element
 
 ## Installation
 
@@ -40,17 +43,44 @@ npm install viewability.js
 
 ## Usage
 
-### Basic Example
+### Selecting the Element to Monitor
+
+The library allows you to pass:
+
+- A direct **HTMLElement** reference.
+- A **string representing an element ID** (without `#`).
+- A **CSS selector** string (e.g., `.class-name`).
+
+If multiple elements match a given selector, **only the first one found will be tracked**.
+
+#### Example:
 
 ```js
 import { Viewability } from "viewability-js";
 
-const tracker = new Viewability(document.getElementById("target-element"), {
-  inViewThreshold: 0.5, // 50% of the element must be visible
-  timeInView: 1000, // Must be in view for 1 second
-  autostart: true, // Automatically start tracking
-  onComplete: () => console.log("Element fully viewed!"), // Callback when viewability is completed
+// Pass an element reference
+new Viewability(document.getElementById("target"));
+
+// Pass an ID string (equivalent to document.getElementById)
+new Viewability("target");
+
+// Pass a CSS selector (selects the first matching element)
+new Viewability(".target");
+```
+
+### Basic Example
+
+```js
+import { Viewability } from "viewability.js";
+
+const tracker = new Viewability("target", {
+  onComplete: () => console.log("Element fully viewed!")
 });
+
+// or
+
+const tracker = new Viewability("target");
+tracker.onComplete = () => console.log("Element fully viewed!");
 ```
 
 ### Options
@@ -72,7 +102,8 @@ const tracker = new Viewability(document.getElementById("target-element"), {
 ### Example: Manually Starting Tracking
 
 ```js
-const tracker = new Viewability("#ad-banner", { autostart: false });
+const tracker = new Viewability("target", { autostart: false });
+tracker.onComplete = () => console.log("Element fully viewed!");
 tracker.start();
 ```
 
@@ -86,14 +117,16 @@ tracker.stop();
 
 Viewability.js relies on the **IntersectionObserver API**, which is supported in all modern browsers. For older browsers (e.g., Internet Explorer), a [polyfill](https://github.com/w3c/IntersectionObserver) may be required.
 
-## License
-
-MIT License
-
 ## Contributing
 
-Contributions are welcome! Feel free to submit issues and pull requests.
+I would greatly appreciate any contributions to make this project better. Please make sure to follow the below guidelines before getting your hands dirty.
 
-## Author
+1. Fork the repository
+2. Create your branch (git checkout -b my-branch)
+3. Commit any changes to your branch
+4. Push your changes to your remote branch
+5. Open a pull request
 
-Developed by Andrea Fassina 🚀
+## License
+
+Copyright [Andrea Fassina](https://github.com/fasenderos), Licensed under [MIT](LICENSE).

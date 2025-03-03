@@ -36,7 +36,8 @@
   "keywords": [
     "viewability",
     "viewability tracker",
-    "iab viewability"
+    "iab viewability",
+    "iab standard viewability"
   ],
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

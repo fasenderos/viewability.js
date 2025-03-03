@@ -165,10 +165,10 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         if (typeof Viewability !== "undefined") {
-          var onComplete = function () {
-            console.log("onComplete fired");
-          };
-          var tracker = new Viewability("target", { onComplete });
+          var tracker = new Viewability("target");
+          tracker.onComplete = function () {
+            console.log("Element '#target' fully viewed!");
+          }
         } else {
           console.error("Viewability is not defined");
         }
