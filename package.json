@@ -30,7 +30,7 @@
     "lint": "biome check ./src ./test",
     "lint:fix": "biome check --write ./src ./test",
     "preview": "vite preview",
-    "release": "release-it",
+    "release": "node --env-file=.env ./node_modules/release-it/bin/release-it.js --ci",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:dev": "vitest --coverage"
