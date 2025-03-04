@@ -12,6 +12,8 @@ Viewability.js is a lightweight JavaScript library that tracks the visibility of
 
 By default, the library follows the **IAB Standard** for viewability measurement (50% visibility for at least 1 second), but these values can be fully customized to fit specific needs.
 
+[DEMO](https://codesandbox.io/p/sandbox/viewability-js-997wl8)
+
 <p align="center">
 :star: Star me on GitHub — it motivates me a lot!
 </p>
