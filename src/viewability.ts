@@ -158,4 +158,6 @@ export class Viewability {
   }
 }
 
+// @ts-expect-error
+window.Viewability = Viewability;
 export default Viewability;
