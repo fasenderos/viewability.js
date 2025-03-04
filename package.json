@@ -5,12 +5,12 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/viewability.js",
-      "require": "./dist/viewability.cjs"
+      "import": "./dist/viewability.es.js",
+      "require": "./dist/viewability.cjs.js"
     }
   },
-  "main": "./dist/viewability.cjs",
-  "module": "./dist/viewability.js",
+  "main": "./dist/viewability.cjs.js",
+  "module": "./dist/viewability.es.js",
   "browser": "./dist/viewability.iife.js",
   "types": "./dist/viewability.d.ts",
   "author": "Andrea Fassina <fasenderos@gmail.com>",
