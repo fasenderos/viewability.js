@@ -1,6 +1,6 @@
 {
   "name": "viewability.js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Viewability tracker used to measure whether a DOM elements is actually seen by users",
   "type": "module",
   "exports": {
