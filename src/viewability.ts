@@ -32,7 +32,7 @@ export class Viewability {
 
   constructor(
     elem: HTMLElement | string,
-    options: Partial<ViewabilityOptions> = {},
+    options: Partial<ViewabilityOptions> = {}
   ) {
     this.options = Object.assign(
       {
@@ -40,7 +40,7 @@ export class Viewability {
         timeInView: 1000,
         autostart: true,
       },
-      options,
+      options
     );
     if (!this._validateOptions()) {
       return;
@@ -61,7 +61,7 @@ export class Viewability {
     if (this.observer) return; // Avoid multiple observers
     this.observer = new window.IntersectionObserver(
       this._viewableChange.bind(this),
-      { threshold: this.options.inViewThreshold },
+      { threshold: this.options.inViewThreshold }
     );
     this.observer.observe(this.element);
   }
@@ -158,6 +158,9 @@ export class Viewability {
   }
 }
 
-// @ts-expect-error
-window.Viewability = Viewability;
+if (typeof window !== "undefined") {
+  // @ts-expect-error
+  window.Viewability = Viewability;
+}
+
 export default Viewability;
