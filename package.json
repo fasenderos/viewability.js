@@ -11,6 +11,7 @@
   },
   "main": "./dist/viewability.cjs",
   "module": "./dist/viewability.js",
+  "browser": "./dist/viewability.iife.js",
   "types": "./dist/viewability.d.ts",
   "author": "Andrea Fassina <fasenderos@gmail.com>",
   "license": "MIT",

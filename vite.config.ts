@@ -10,7 +10,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, "src/main.ts"),
-      formats: ["es", "cjs"],
+      formats: ["es", "cjs", "iife"],
       name: "Viewability",
       fileName: "viewability",
     },
