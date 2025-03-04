@@ -57,7 +57,7 @@ If multiple elements match a given selector, **only the first one found will be 
 #### Example:
 
 ```js
-import { Viewability } from "viewability-js";
+import { Viewability } from "viewability.js";
 
 // Pass an element reference
 new Viewability(document.getElementById("target"));
