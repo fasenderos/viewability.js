@@ -11,7 +11,7 @@ const IntersectionObserverMock = vi.fn(() => ({
 }));
 
 const getIntersectionEntry = (
-  opts: Partial<IntersectionObserverEntry> = {}
+  opts: Partial<IntersectionObserverEntry> = {},
 ): IntersectionObserverEntry => {
   return {
     intersectionRatio: 0.5,
@@ -338,7 +338,7 @@ describe("Viewability.js", () => {
         ({
           width: 970,
           height: 250,
-        } as DOMRect)
+        }) as DOMRect,
     );
     const tracker = new Viewability(element);
     tracker.start();
@@ -358,7 +358,7 @@ describe("Viewability.js", () => {
     it("should return false if element not exists", () => {
       const tracker = new Viewability("wrong-id");
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect
+        getIntersectionEntry().boundingClientRect,
       );
       expect(result).toBe(false);
     });
@@ -367,7 +367,7 @@ describe("Viewability.js", () => {
       const tracker = new Viewability(element);
       element.hidden = true;
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect
+        getIntersectionEntry().boundingClientRect,
       );
       expect(result).toBe(false);
     });
@@ -376,7 +376,7 @@ describe("Viewability.js", () => {
       const tracker = new Viewability(element);
       element.style.display = "none";
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect
+        getIntersectionEntry().boundingClientRect,
       );
       expect(result).toBe(false);
     });
@@ -385,7 +385,7 @@ describe("Viewability.js", () => {
       const tracker = new Viewability(element);
       element.style.visibility = "hidden";
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect
+        getIntersectionEntry().boundingClientRect,
       );
       expect(result).toBe(false);
     });
@@ -394,7 +394,7 @@ describe("Viewability.js", () => {
       const tracker = new Viewability(element);
       element.style.visibility = "collapse";
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect
+        getIntersectionEntry().boundingClientRect,
       );
       expect(result).toBe(false);
     });
@@ -403,7 +403,7 @@ describe("Viewability.js", () => {
       const tracker = new Viewability(element);
       element.style.opacity = "0";
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect
+        getIntersectionEntry().boundingClientRect,
       );
       expect(result).toBe(false);
     });
@@ -412,7 +412,9 @@ describe("Viewability.js", () => {
       const tracker = new Viewability(element);
       {
         const result = tracker._isReallyVisible(
-          Object.assign(getIntersectionEntry().boundingClientRect, { width: 0 })
+          Object.assign(getIntersectionEntry().boundingClientRect, {
+            width: 0,
+          }),
         );
         expect(result).toBe(false);
       }
@@ -421,7 +423,7 @@ describe("Viewability.js", () => {
         const result = tracker._isReallyVisible(
           Object.assign(getIntersectionEntry().boundingClientRect, {
             height: 0,
-          })
+          }),
         );
         expect(result).toBe(false);
       }
@@ -431,7 +433,7 @@ describe("Viewability.js", () => {
       const tracker = new Viewability(element);
       element.style.transform = "scale(0)";
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect
+        getIntersectionEntry().boundingClientRect,
       );
       expect(result).toBe(false);
     });
@@ -441,7 +443,7 @@ describe("Viewability.js", () => {
       // In a 2D matrix, matrix(a, b, c, d, tx, ty), a and d represent scaling factors
       element.style.transform = "matrix(0, 0, 0, 1, 0, 0)"; // scaleX is 0
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect
+        getIntersectionEntry().boundingClientRect,
       );
       expect(result).toBe(false);
     });
@@ -451,7 +453,7 @@ describe("Viewability.js", () => {
       // In a 2D matrix, matrix(a, b, c, d, tx, ty), a and d represent scaling factors
       element.style.transform = "matrix(1, 0, 0, 0, 0, 0)"; // scaleY is 0
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect
+        getIntersectionEntry().boundingClientRect,
       );
       expect(result).toBe(false);
     });
@@ -467,7 +469,7 @@ describe("Viewability.js", () => {
       {
         // Parent not hidden
         const result = tracker._isReallyVisible(
-          getIntersectionEntry().boundingClientRect
+          getIntersectionEntry().boundingClientRect,
         );
         expect(result).toBe(true);
       }
@@ -476,7 +478,7 @@ describe("Viewability.js", () => {
         // Parent hidden
         parent.style.display = "none";
         const result = tracker._isReallyVisible(
-          getIntersectionEntry().boundingClientRect
+          getIntersectionEntry().boundingClientRect,
         );
         expect(result).toBe(false);
       }
@@ -490,7 +492,7 @@ describe("Viewability.js", () => {
       // male elementFromPoint to return the overlapping element
       document.elementFromPoint = vi.fn(() => coverElement);
       expect(
-        tracker._isReallyVisible(getIntersectionEntry().boundingClientRect)
+        tracker._isReallyVisible(getIntersectionEntry().boundingClientRect),
       ).toBe(false);
     });
   });
@@ -499,14 +501,14 @@ describe("Viewability.js", () => {
     it("should return false if element not exists", () => {
       const tracker = new Viewability("wrong-id");
       expect(
-        tracker._isObscured(getIntersectionEntry().boundingClientRect)
+        tracker._isObscured(getIntersectionEntry().boundingClientRect),
       ).toBe(false);
     });
 
     it("should return false if element is not obscured", () => {
       const tracker = new Viewability(element);
       expect(
-        tracker._isObscured(getIntersectionEntry().boundingClientRect)
+        tracker._isObscured(getIntersectionEntry().boundingClientRect),
       ).toBe(false);
     });
 
@@ -517,7 +519,7 @@ describe("Viewability.js", () => {
       // Set a lower innerWidth compared to some sample points
       window.innerWidth = 200;
       expect(
-        tracker._isObscured(getIntersectionEntry().boundingClientRect)
+        tracker._isObscured(getIntersectionEntry().boundingClientRect),
       ).toBe(false);
       // Restore the original innerWidth
       window.innerWidth = originalInnerWidth;
@@ -529,7 +531,7 @@ describe("Viewability.js", () => {
       // male elementFromPoint to return the overlapping element
       document.elementFromPoint = vi.fn(() => coverElement);
       expect(
-        tracker._isObscured(getIntersectionEntry().boundingClientRect)
+        tracker._isObscured(getIntersectionEntry().boundingClientRect),
       ).toBe(true);
     });
 
@@ -544,7 +546,7 @@ describe("Viewability.js", () => {
       });
       tracker.options.coverageThreshold = 0.5; // 5/9 ≈ 0.56 => must return true
       expect(
-        tracker._isObscured(getIntersectionEntry().boundingClientRect)
+        tracker._isObscured(getIntersectionEntry().boundingClientRect),
       ).toBe(true);
 
       // Reset e test with an higher threshold
@@ -556,7 +558,7 @@ describe("Viewability.js", () => {
       });
       tracker.options.coverageThreshold = 0.5; // 3/9 ≈ 0.33 => must return false
       expect(
-        tracker._isObscured(getIntersectionEntry().boundingClientRect)
+        tracker._isObscured(getIntersectionEntry().boundingClientRect),
       ).toBe(false);
     });
   });
