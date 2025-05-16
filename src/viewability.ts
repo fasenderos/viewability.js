@@ -63,7 +63,7 @@ export class Viewability {
 
   constructor(
     elem: HTMLElement | string,
-    options: Partial<ViewabilityOptions> = {}
+    options: Partial<ViewabilityOptions> = {},
   ) {
     this.options = Object.assign(
       {
@@ -74,7 +74,7 @@ export class Viewability {
         isVisible: true,
         timeInView: 1000, // IAB Standard default
       },
-      options
+      options,
     );
     if (!this._validateOptions()) {
       return;
@@ -150,7 +150,7 @@ export class Viewability {
 
       // Create an observer instance linked to the callback function
       this.visibilityObserver = new window.MutationObserver(
-        this._visibilityChange.bind(this)
+        this._visibilityChange.bind(this),
       );
 
       // Start observing the target node for configured mutations
@@ -198,7 +198,7 @@ export class Viewability {
     if (this.viewableObserver === null) {
       this.viewableObserver = new window.IntersectionObserver(
         this._viewableChange.bind(this),
-        { threshold: this.options.inViewThreshold }
+        { threshold: this.options.inViewThreshold },
       );
       this.viewableObserver.observe(this.element);
     }
@@ -289,19 +289,19 @@ export class Viewability {
     } = this.options;
     if (typeof autostart !== "boolean") {
       this._handleError(
-        new Error("'coverageThreshold' must be 'true' or 'false'")
+        new Error("'coverageThreshold' must be 'true' or 'false'"),
       );
       return false;
     }
     if (typeof autostop !== "boolean") {
       this._handleError(
-        new Error("'coverageThreshold' must be 'true' or 'false'")
+        new Error("'coverageThreshold' must be 'true' or 'false'"),
       );
       return false;
     }
     if (typeof isVisible !== "boolean") {
       this._handleError(
-        new Error("'coverageThreshold' must be 'true' or 'false'")
+        new Error("'coverageThreshold' must be 'true' or 'false'"),
       );
       return false;
     }
@@ -312,8 +312,8 @@ export class Viewability {
     ) {
       this._handleError(
         new Error(
-          "'coverageThreshold' must be a number greater than 0 and up to 1"
-        )
+          "'coverageThreshold' must be a number greater than 0 and up to 1",
+        ),
       );
       return false;
     }
@@ -323,13 +323,13 @@ export class Viewability {
       inViewThreshold > 1
     ) {
       this._handleError(
-        new Error("'inViewThreshold' must be a number between 0 and 1")
+        new Error("'inViewThreshold' must be a number between 0 and 1"),
       );
       return false;
     }
     if (typeof timeInView !== "number" || timeInView < 0) {
       this._handleError(
-        new Error("'timeInView' must be a number greater than or equal to 0")
+        new Error("'timeInView' must be a number greater than or equal to 0"),
       );
       return false;
     }
