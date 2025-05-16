@@ -8,7 +8,7 @@
 
 # Viewability.js
 
-Viewability.js is a lightweight JavaScript library that tracks the visibility of a DOM element within the viewport using the IntersectionObserver API. It allows developers to measure how much of an element is visible and for how long, making it useful for ad tracking, analytics, and user engagement monitoring.
+**Viewability.js** is a lightweight, dependency-free JavaScript library that tracks the visibility and viewability of a DOM element within the viewport using the `IntersectionObserver` and `MutationObserver` API. It allows developers to measure how much of an element is viewable and for how long, making it useful for ad tracking, analytics, and user engagement monitoring.
 
 By default, the library follows the **IAB Standard** for viewability measurement (50% visibility for at least 1 second), but these values can be fully customized to fit specific needs.
 
@@ -24,7 +24,7 @@ By default, the library follows the **IAB Standard** for viewability measurement
 - Uses [**IAB Standard Guidelines**](https://www.iab.com/wp-content/uploads/2015/06/MRC-Viewable-Ad-Impression-Measurement-Guideline.pdf) for viewability measurement. Default to 50%, and 30% for large element sized at 242,500 pixels.
 - Supports **custom viewability thresholds**
 - Measures **time in view** before marking an element as fully viewed (default to 1 second)
-- Advanced [**visibility detection**](#visibility-detection)
+- Uses [**MutationObserver**](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) for the advanced [**visibility detection**](#visibility-detection)
 - Exposes a **public API** for manual control
 - Provides an **onComplete callback** when the element meets the viewability criteria
 - Accepts an [**element reference**](https://developer.mozilla.org/en-US/docs/Web/API/Element), an element [**ID string**](https://developer.mozilla.org/en-US/docs/Web/API/Element/id), or a [**CSS selector**](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_selectors) to specify the target element
@@ -138,7 +138,7 @@ tracker.stop();
 
 ## Browser Support
 
-Viewability.js relies on the **IntersectionObserver API**, which is supported in all modern browsers. For older browsers (e.g., Internet Explorer), a [polyfill](https://github.com/w3c/IntersectionObserver) may be required.
+Viewability.js relies on the **IntersectionObserver** and **MutationObserver** API, which are supported in all modern browsers. For older browsers (e.g., Internet Explorer), a polyfill may be required.
 
 ## Contributing
 

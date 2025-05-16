@@ -11,7 +11,7 @@ const IntersectionObserverMock = vi.fn(() => ({
 }));
 
 const getIntersectionEntry = (
-  opts: Partial<IntersectionObserverEntry> = {},
+  opts: Partial<IntersectionObserverEntry> = {}
 ): IntersectionObserverEntry => {
   return {
     intersectionRatio: 0.5,
@@ -34,14 +34,18 @@ const getIntersectionEntry = (
 vi.stubGlobal("IntersectionObserver", IntersectionObserverMock);
 
 describe("Viewability.js", () => {
-  let element: HTMLElement;
-  let originalConsoleError: typeof console.error;
-  let originalGetBoundingClientRect: typeof element.getBoundingClientRect;
+  let container: HTMLDivElement;
+  let element: HTMLDivElement;
 
   beforeEach(() => {
-    // Set viewport dimensions to ensure all sample points are inside
-    window.innerWidth = 1024;
-    window.innerHeight = 768;
+    // --- Simulate viewport ---
+    vi.stubGlobal("innerWidth", 1024);
+    vi.stubGlobal("innerHeight", 768);
+
+    // --- Isolated container for each test ---
+    container = document.createElement("div");
+    container.id = "test-container";
+    document.body.appendChild(container);
 
     // Create a 300x250 element and append it to the body
     element = document.createElement("div");
@@ -50,21 +54,34 @@ describe("Viewability.js", () => {
     element.style.width = "300px";
     element.style.height = "250px";
 
-    document.body.appendChild(element);
+    container.appendChild(element);
+
+    // --- document.elementFromPoint per _isObscured ---
     document.elementFromPoint = vi.fn(() => element);
 
-    originalConsoleError = console.error;
-    originalGetBoundingClientRect = element.getBoundingClientRect;
+    // --- Silenzio eventuali console.error interni ---
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    // --- Spy su getBoundingClientRect per controllare DOMRect ---
+    vi.spyOn(element, "getBoundingClientRect").mockReturnValue({
+      width: 300,
+      height: 250,
+      top: 10,
+      left: 20,
+      right: 320,
+      bottom: 260,
+      x: 20,
+      y: 10,
+      toJSON: () => {},
+    });
   });
 
   afterEach(() => {
-    document.body.innerHTML = "";
+    container.remove();
+    vi.restoreAllMocks();
     // Restore document.elementFromPoint
     // @ts-ignore
     document.elementFromPoint = document.__proto__.elementFromPoint;
-    // Restore original console.error
-    console.error = originalConsoleError;
-    element.getBoundingClientRect = originalGetBoundingClientRect;
   });
 
   it("should initialize with default options", () => {
@@ -199,19 +216,22 @@ describe("Viewability.js", () => {
     // Test for missing entries
     tracker._viewableChange([] as IntersectionObserverEntry[]);
     expect(mockCallback).not.toHaveBeenCalled();
-    expect(tracker.observer).not.toBeNull();
+    expect(tracker.visibilityObserver).not.toBeNull();
+    expect(tracker.viewableObserver).not.toBeNull();
     expect(tracker.timer).toBeUndefined();
 
     tracker._viewableChange([getIntersectionEntry()]);
 
     expect(mockCallback).not.toHaveBeenCalled();
-    expect(tracker.observer).not.toBeNull();
+     expect(tracker.visibilityObserver).not.toBeNull();
+    expect(tracker.viewableObserver).not.toBeNull();
     expect(tracker.timer).not.toBeUndefined();
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     expect(mockCallback).toHaveBeenCalled();
-    expect(tracker.observer).toBeNull();
+    expect(tracker.visibilityObserver).toBeNull();
+    expect(tracker.viewableObserver).toBeNull();
     expect(tracker.timer).toBeUndefined();
   });
 
@@ -224,13 +244,15 @@ describe("Viewability.js", () => {
     tracker._viewableChange([getIntersectionEntry()]);
 
     expect(mockCallback).not.toHaveBeenCalled();
-    expect(tracker.observer).not.toBeNull();
+    expect(tracker.visibilityObserver).not.toBeNull();
+    expect(tracker.viewableObserver).not.toBeNull();
     expect(tracker.timer).not.toBeUndefined();
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     expect(mockCallback).toHaveBeenCalled();
-    expect(tracker.observer).toBeNull();
+    expect(tracker.visibilityObserver).toBeNull();
+    expect(tracker.viewableObserver).toBeNull();
     expect(tracker.timer).toBeUndefined();
   });
 
@@ -242,13 +264,15 @@ describe("Viewability.js", () => {
     tracker._viewableChange([getIntersectionEntry()]);
 
     expect(mockCallback).not.toHaveBeenCalled();
-    expect(tracker.observer).not.toBeNull();
+    expect(tracker.visibilityObserver).not.toBeNull();
+    expect(tracker.viewableObserver).not.toBeNull();
     expect(tracker.timer).not.toBeUndefined();
 
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     expect(mockCallback).toHaveBeenCalled();
-    expect(tracker.observer).toBeNull();
+    expect(tracker.visibilityObserver).toBeNull();
+    expect(tracker.viewableObserver).toBeNull();
     expect(tracker.timer).toBeUndefined();
   });
 
@@ -263,14 +287,16 @@ describe("Viewability.js", () => {
     tracker._viewableChange([getIntersectionEntry()]);
     await new Promise((resolve) => setTimeout(resolve, 200));
     expect(mockCallback).not.toHaveBeenCalled();
-    expect(tracker.observer).not.toBeNull();
+    expect(tracker.visibilityObserver).not.toBeNull();
+    expect(tracker.viewableObserver).not.toBeNull();
     expect(tracker.timer).toBeUndefined();
 
     tracker._viewableChange([getIntersectionEntry({ intersectionRatio: 0.6 })]);
     await new Promise((resolve) => setTimeout(resolve, 200));
 
     expect(mockCallback).toHaveBeenCalled();
-    expect(tracker.observer).toBeNull();
+    expect(tracker.visibilityObserver).toBeNull();
+    expect(tracker.viewableObserver).toBeNull();
     expect(tracker.timer).toBeUndefined();
   });
 
@@ -287,7 +313,8 @@ describe("Viewability.js", () => {
     expect(tracker.timer).toBeUndefined();
     await new Promise((resolve) => setTimeout(resolve, 1000));
     expect(mockCallback).not.toHaveBeenCalled();
-    expect(tracker.observer).not.toBeNull();
+    expect(tracker.visibilityObserver).not.toBeNull();
+    expect(tracker.viewableObserver).not.toBeNull();
   });
 
   it("test inView/outView with onComplete option", async () => {
@@ -304,14 +331,16 @@ describe("Viewability.js", () => {
     expect(tracker.timer).toBeUndefined();
     await new Promise((resolve) => setTimeout(resolve, 1000));
     expect(mockCallback).not.toHaveBeenCalled();
-    expect(tracker.observer).not.toBeNull();
+    expect(tracker.visibilityObserver).not.toBeNull();
+    expect(tracker.viewableObserver).not.toBeNull();
   });
 
   it("should stop tracking when stop() is called", () => {
     const tracker = new Viewability(element);
     tracker.start();
     tracker.stop();
-    expect(tracker.observer).toBeNull();
+    expect(tracker.visibilityObserver).toBeNull();
+    expect(tracker.viewableObserver).toBeNull();
     expect(tracker.timer).toBeUndefined();
   });
 
@@ -326,8 +355,9 @@ describe("Viewability.js", () => {
     await new Promise((resolve) => setTimeout(resolve, 200));
 
     expect(mockCallback).toHaveBeenCalled();
-    // observer should not be disconnected
-    expect(tracker.observer).not.toBeNull();
+    
+    expect(tracker.visibilityObserver).not.toBeNull();
+    expect(tracker.viewableObserver).not.toBeNull();
     expect(tracker.timer).toBeUndefined();
   });
 
@@ -338,11 +368,84 @@ describe("Viewability.js", () => {
         ({
           width: 970,
           height: 250,
-        }) as DOMRect,
+        } as DOMRect)
     );
     const tracker = new Viewability(element);
     tracker.start();
     expect(tracker.options.inViewThreshold).toBe(0.3);
+  });
+
+  describe("isVisible", () => {
+    it("should start visibility when element is already visibile", () => {
+      const tracker = new Viewability(element);
+      expect(tracker.visibilityObserver).not.toBeNull();
+      expect(tracker.viewableObserver).not.toBeNull();
+    });
+
+    it("should start visibility when element is NOT visibile", async () => {
+      element.hidden = true;
+      const tracker = new Viewability(element);
+      expect(tracker.visibilityObserver).not.toBeNull();
+      expect(tracker.viewableObserver).toBeNull();
+      // Changing the element visibility should start the viewability
+      element.hidden = false;
+
+      // **Wait for microtask** where JSDOM call the mutation observer callbak
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(tracker.visibilityObserver).not.toBeNull();
+      expect(tracker.viewableObserver).not.toBeNull();
+
+      tracker.stop();
+      expect(tracker.visibilityObserver).toBeNull();
+      expect(tracker.viewableObserver).toBeNull();
+    });
+
+    it("should continue to check for visibility", async () => {
+      element.hidden = true;
+      const tracker = new Viewability(element);
+      const mockedStartViewabilityChanges = vi.fn();
+      const mockedStopTimerFn = vi.fn();
+      const mockedUnobserveViewableFn = vi.fn();
+
+      tracker._startViewabilityChanges = mockedStartViewabilityChanges;
+      tracker._stopTimer = mockedStopTimerFn;
+      tracker._unobserveViewable = mockedUnobserveViewableFn;
+
+      expect(mockedStartViewabilityChanges).not.toHaveBeenCalled();
+      expect(mockedStopTimerFn).not.toHaveBeenCalled();
+      expect(mockedUnobserveViewableFn).not.toHaveBeenCalled();
+
+      element.style.display = "none";
+
+      // **Wait for microtask** where JSDOM call the mutation observer callbak
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(mockedStartViewabilityChanges).not.toHaveBeenCalled();
+      expect(mockedStopTimerFn).toHaveBeenCalledOnce();
+      expect(mockedUnobserveViewableFn).toHaveBeenCalledOnce();
+
+      element.classList.add("foo");
+
+      // **Wait for microtask** where JSDOM call the mutation observer callbak
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(mockedStartViewabilityChanges).not.toHaveBeenCalled();
+      expect(mockedStopTimerFn).toHaveBeenCalledTimes(2);
+      expect(mockedUnobserveViewableFn).toHaveBeenCalledTimes(2);
+
+      // Now set element has visible
+      element.hidden = false;
+      element.style.display = "block";
+      element.classList.remove("foo");
+
+      // **Wait for microtask** where JSDOM call the mutation observer callbak
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Here the number of times should not be changed (function not called anymore)
+      expect(mockedStartViewabilityChanges).toHaveBeenCalledOnce();
+      expect(mockedStopTimerFn).toHaveBeenCalledTimes(2);
+      expect(mockedUnobserveViewableFn).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe("_isReallyVisible", () => {
@@ -358,7 +461,7 @@ describe("Viewability.js", () => {
     it("should return false if element not exists", () => {
       const tracker = new Viewability("wrong-id");
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect,
+        getIntersectionEntry().boundingClientRect
       );
       expect(result).toBe(false);
     });
@@ -367,7 +470,7 @@ describe("Viewability.js", () => {
       const tracker = new Viewability(element);
       element.hidden = true;
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect,
+        getIntersectionEntry().boundingClientRect
       );
       expect(result).toBe(false);
     });
@@ -376,7 +479,7 @@ describe("Viewability.js", () => {
       const tracker = new Viewability(element);
       element.style.display = "none";
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect,
+        getIntersectionEntry().boundingClientRect
       );
       expect(result).toBe(false);
     });
@@ -385,7 +488,7 @@ describe("Viewability.js", () => {
       const tracker = new Viewability(element);
       element.style.visibility = "hidden";
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect,
+        getIntersectionEntry().boundingClientRect
       );
       expect(result).toBe(false);
     });
@@ -394,7 +497,7 @@ describe("Viewability.js", () => {
       const tracker = new Viewability(element);
       element.style.visibility = "collapse";
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect,
+        getIntersectionEntry().boundingClientRect
       );
       expect(result).toBe(false);
     });
@@ -403,7 +506,7 @@ describe("Viewability.js", () => {
       const tracker = new Viewability(element);
       element.style.opacity = "0";
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect,
+        getIntersectionEntry().boundingClientRect
       );
       expect(result).toBe(false);
     });
@@ -414,7 +517,7 @@ describe("Viewability.js", () => {
         const result = tracker._isReallyVisible(
           Object.assign(getIntersectionEntry().boundingClientRect, {
             width: 0,
-          }),
+          })
         );
         expect(result).toBe(false);
       }
@@ -423,7 +526,7 @@ describe("Viewability.js", () => {
         const result = tracker._isReallyVisible(
           Object.assign(getIntersectionEntry().boundingClientRect, {
             height: 0,
-          }),
+          })
         );
         expect(result).toBe(false);
       }
@@ -433,7 +536,7 @@ describe("Viewability.js", () => {
       const tracker = new Viewability(element);
       element.style.transform = "scale(0)";
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect,
+        getIntersectionEntry().boundingClientRect
       );
       expect(result).toBe(false);
     });
@@ -443,7 +546,7 @@ describe("Viewability.js", () => {
       // In a 2D matrix, matrix(a, b, c, d, tx, ty), a and d represent scaling factors
       element.style.transform = "matrix(0, 0, 0, 1, 0, 0)"; // scaleX is 0
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect,
+        getIntersectionEntry().boundingClientRect
       );
       expect(result).toBe(false);
     });
@@ -453,7 +556,7 @@ describe("Viewability.js", () => {
       // In a 2D matrix, matrix(a, b, c, d, tx, ty), a and d represent scaling factors
       element.style.transform = "matrix(1, 0, 0, 0, 0, 0)"; // scaleY is 0
       const result = tracker._isReallyVisible(
-        getIntersectionEntry().boundingClientRect,
+        getIntersectionEntry().boundingClientRect
       );
       expect(result).toBe(false);
     });
@@ -469,7 +572,7 @@ describe("Viewability.js", () => {
       {
         // Parent not hidden
         const result = tracker._isReallyVisible(
-          getIntersectionEntry().boundingClientRect,
+          getIntersectionEntry().boundingClientRect
         );
         expect(result).toBe(true);
       }
@@ -478,7 +581,7 @@ describe("Viewability.js", () => {
         // Parent hidden
         parent.style.display = "none";
         const result = tracker._isReallyVisible(
-          getIntersectionEntry().boundingClientRect,
+          getIntersectionEntry().boundingClientRect
         );
         expect(result).toBe(false);
       }
@@ -492,7 +595,7 @@ describe("Viewability.js", () => {
       // male elementFromPoint to return the overlapping element
       document.elementFromPoint = vi.fn(() => coverElement);
       expect(
-        tracker._isReallyVisible(getIntersectionEntry().boundingClientRect),
+        tracker._isReallyVisible(getIntersectionEntry().boundingClientRect)
       ).toBe(false);
     });
   });
@@ -501,14 +604,14 @@ describe("Viewability.js", () => {
     it("should return false if element not exists", () => {
       const tracker = new Viewability("wrong-id");
       expect(
-        tracker._isObscured(getIntersectionEntry().boundingClientRect),
+        tracker._isObscured(getIntersectionEntry().boundingClientRect)
       ).toBe(false);
     });
 
     it("should return false if element is not obscured", () => {
       const tracker = new Viewability(element);
       expect(
-        tracker._isObscured(getIntersectionEntry().boundingClientRect),
+        tracker._isObscured(getIntersectionEntry().boundingClientRect)
       ).toBe(false);
     });
 
@@ -519,7 +622,7 @@ describe("Viewability.js", () => {
       // Set a lower innerWidth compared to some sample points
       window.innerWidth = 200;
       expect(
-        tracker._isObscured(getIntersectionEntry().boundingClientRect),
+        tracker._isObscured(getIntersectionEntry().boundingClientRect)
       ).toBe(false);
       // Restore the original innerWidth
       window.innerWidth = originalInnerWidth;
@@ -531,7 +634,7 @@ describe("Viewability.js", () => {
       // male elementFromPoint to return the overlapping element
       document.elementFromPoint = vi.fn(() => coverElement);
       expect(
-        tracker._isObscured(getIntersectionEntry().boundingClientRect),
+        tracker._isObscured(getIntersectionEntry().boundingClientRect)
       ).toBe(true);
     });
 
@@ -546,7 +649,7 @@ describe("Viewability.js", () => {
       });
       tracker.options.coverageThreshold = 0.5; // 5/9 ≈ 0.56 => must return true
       expect(
-        tracker._isObscured(getIntersectionEntry().boundingClientRect),
+        tracker._isObscured(getIntersectionEntry().boundingClientRect)
       ).toBe(true);
 
       // Reset e test with an higher threshold
@@ -558,7 +661,7 @@ describe("Viewability.js", () => {
       });
       tracker.options.coverageThreshold = 0.5; // 3/9 ≈ 0.33 => must return false
       expect(
-        tracker._isObscured(getIntersectionEntry().boundingClientRect),
+        tracker._isObscured(getIntersectionEntry().boundingClientRect)
       ).toBe(false);
     });
   });

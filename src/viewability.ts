@@ -5,7 +5,7 @@ export type ViewabilityOptions = {
    */
   autostart?: boolean;
   /**
-   * Automatically stop tracking and disconnects the observer when viewability is completed
+   * Automatically stop tracking and disconnects the observers when viewability is completed
    * @default true
    */
   autostop?: boolean;
@@ -57,12 +57,13 @@ export class Viewability {
   completed = false;
   inView = false;
   started = false;
-  observer: IntersectionObserver | null = null;
+  viewableObserver: IntersectionObserver | null = null;
+  visibilityObserver: MutationObserver | null = null;
   timer: NodeJS.Timeout | undefined;
 
   constructor(
     elem: HTMLElement | string,
-    options: Partial<ViewabilityOptions> = {},
+    options: Partial<ViewabilityOptions> = {}
   ) {
     this.options = Object.assign(
       {
@@ -73,7 +74,7 @@ export class Viewability {
         isVisible: true,
         timeInView: 1000, // IAB Standard default
       },
-      options,
+      options
     );
     if (!this._validateOptions()) {
       return;
@@ -86,7 +87,103 @@ export class Viewability {
   start(): void {
     this._initializeElement();
     // Avoid multiple observers
-    if (this.observer !== null || this.element === null) return;
+    if (
+      this.visibilityObserver !== null ||
+      this.viewableObserver !== null ||
+      this.element === null
+    )
+      return;
+
+    if (this.options.isVisible) {
+      this._startVisibilityChanges();
+    } else {
+      this._startViewabilityChanges();
+    }
+  }
+
+  /** Stops observing the element and cleans up the observer and timer */
+  stop(): void {
+    this._unobserveVisibility();
+    this._unobserveViewable();
+    this._stopTimer();
+  }
+
+  _initializeElement(): void {
+    if (this.element === null) {
+      const element = this._getElement(this.el);
+      if (!element) {
+        this._handleError(new Error("Element not found"));
+        return;
+      }
+      this.element = element;
+    }
+  }
+
+  _unobserveVisibility(): void {
+    if (this.visibilityObserver !== null) {
+      this.visibilityObserver.disconnect();
+      this.visibilityObserver = null;
+    }
+  }
+
+  _unobserveViewable(): void {
+    if (this.viewableObserver !== null && this.element !== null) {
+      this.viewableObserver.unobserve(this.element);
+      this.viewableObserver.disconnect();
+      this.viewableObserver = null;
+    }
+  }
+
+  /** Start Mutation Observer to track the real visibility of an element. */
+  _startVisibilityChanges(): void {
+    /* c8 ignore next */
+    if (!this.element) return;
+
+    if (this.visibilityObserver === null) {
+      // Options for the visibility observer (which mutations to observe)
+      const config = {
+        attributes: true,
+        attributeFilter: ["style", "class", "hidden", "aria-hidden"],
+        childList: false,
+        subtree: false,
+      };
+
+      // Create an observer instance linked to the callback function
+      this.visibilityObserver = new window.MutationObserver(
+        this._visibilityChange.bind(this)
+      );
+
+      // Start observing the target node for configured mutations
+      this.visibilityObserver.observe(this.element, config);
+    }
+
+    const rect = this.element.getBoundingClientRect();
+
+    // Check if element is already visible and if so start checking for viewability
+    if (this._isReallyVisible(rect)) {
+      this._startViewabilityChanges();
+    }
+  }
+
+  _visibilityChange(): void {
+    /* c8 ignore next */
+    if (!this.element) return;
+
+    const rect = this.element.getBoundingClientRect();
+
+    // When the element is visibile we can start checking for viewability
+    if (this._isReallyVisible(rect)) {
+      this._startViewabilityChanges();
+    } else {
+      // Every time the element become invisible we need to stop checking for viewability
+      this._unobserveViewable();
+      this._stopTimer();
+    }
+  }
+
+  _startViewabilityChanges(): void {
+    /* c8 ignore next */
+    if (!this.element) return;
     /**
      * If the `inViewThreshold` is the one defined by the IAB standard and the area of
      * the element is >= 242.500 set the threshold to 30% as per IAB definition
@@ -98,35 +195,12 @@ export class Viewability {
       if (area >= this.largeSizeElement) this.options.inViewThreshold = 0.3;
     }
 
-    this.observer = new window.IntersectionObserver(
-      this._viewableChange.bind(this),
-      { threshold: this.options.inViewThreshold },
-    );
-    this.observer.observe(this.element);
-  }
-
-  /** Stops observing the element and cleans up the observer and timer */
-  stop(): void {
-    this._unobserve();
-    this._stopTimer();
-  }
-
-  _initializeElement() {
-    if (this.element === null) {
-      const element = this._getElement(this.el);
-      if (!element) {
-        this._handleError(new Error("Element not found"));
-        return;
-      }
-      this.element = element;
-    }
-  }
-
-  _unobserve() {
-    if (this.observer && this.element) {
-      this.observer.unobserve(this.element);
-      this.observer.disconnect();
-      this.observer = null;
+    if (this.viewableObserver === null) {
+      this.viewableObserver = new window.IntersectionObserver(
+        this._viewableChange.bind(this),
+        { threshold: this.options.inViewThreshold }
+      );
+      this.viewableObserver.observe(this.element);
     }
   }
 
@@ -186,7 +260,10 @@ export class Viewability {
       if (typeof onComplete === "function") onComplete();
     }
     // Stop tracking element
-    if (this.options.autostop) this._unobserve();
+    if (this.options.autostop) {
+      this._unobserveVisibility();
+      this._unobserveViewable();
+    }
     // Always stop timer onComplete
     this._stopTimer();
   }
@@ -212,19 +289,19 @@ export class Viewability {
     } = this.options;
     if (typeof autostart !== "boolean") {
       this._handleError(
-        new Error("'coverageThreshold' must be 'true' or 'false'"),
+        new Error("'coverageThreshold' must be 'true' or 'false'")
       );
       return false;
     }
     if (typeof autostop !== "boolean") {
       this._handleError(
-        new Error("'coverageThreshold' must be 'true' or 'false'"),
+        new Error("'coverageThreshold' must be 'true' or 'false'")
       );
       return false;
     }
     if (typeof isVisible !== "boolean") {
       this._handleError(
-        new Error("'coverageThreshold' must be 'true' or 'false'"),
+        new Error("'coverageThreshold' must be 'true' or 'false'")
       );
       return false;
     }
@@ -235,8 +312,8 @@ export class Viewability {
     ) {
       this._handleError(
         new Error(
-          "'coverageThreshold' must be a number greater than 0 and up to 1",
-        ),
+          "'coverageThreshold' must be a number greater than 0 and up to 1"
+        )
       );
       return false;
     }
@@ -246,13 +323,13 @@ export class Viewability {
       inViewThreshold > 1
     ) {
       this._handleError(
-        new Error("'inViewThreshold' must be a number between 0 and 1"),
+        new Error("'inViewThreshold' must be a number between 0 and 1")
       );
       return false;
     }
     if (typeof timeInView !== "number" || timeInView < 0) {
       this._handleError(
-        new Error("'timeInView' must be a number greater than or equal to 0"),
+        new Error("'timeInView' must be a number greater than or equal to 0")
       );
       return false;
     }
@@ -319,7 +396,7 @@ export class Viewability {
   }
 
   // Helper function that checks if the element is obscured by sampling multiple points
-  _isObscured = (rect: DOMRect) => {
+  _isObscured = (rect: DOMRect): boolean => {
     // Return false immediately if the element is null or undefined
     if (!this.element) return false;
 
@@ -368,7 +445,7 @@ export class Viewability {
     return coveredRatio >= this.options.coverageThreshold;
   };
 
-  _handleError(error: Error) {
+  _handleError(error: Error): void {
     const onError = this.options.onError ?? this.onError;
     if (typeof onError === "function") {
       onError(error);
