@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0](https://github.com/fasenderos/viewability.js/compare/v0.1.0...v0.2.0) (2025-05-16)
+
+### Features
+
+* visibility mutation observer ([4faa7e2](https://github.com/fasenderos/viewability.js/commit/4faa7e22e5d5f95398bf03c974378cafdcae0b48))
+
 ## [0.1.0](https://github.com/fasenderos/viewability.js/compare/v0.0.6...v0.1.0) (2025-03-17)
 
 ### Features
